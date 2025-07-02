@@ -11,8 +11,8 @@ series_e = next(sc for sc in calc.share_classes if sc.name == "Series E")
 print("Series E details:")
 print(f"  Preference Type: {series_e.preference_type}")
 print(f"  Invested: ${series_e.invested/1000000:.2f}M")
-print(f"  Participation Cap: {series_e.participation_cap}x")
-print(f"  Max payout with cap: ${series_e.invested * series_e.participation_cap / 1000000:.2f}M") # pyright: ignore
+print(f"  Participation Cap: {series_e.participation_cap if series_e.participation_cap is not None else 'None'}")
+print(f"  Max payout with cap: ${series_e.invested * (series_e.participation_cap or 0) / 1000000:.2f}M")
 
 # Test $170M distribution
 print("\nDistribution at $170M:")
@@ -24,8 +24,9 @@ for sc in sorted(calc.share_classes, key=lambda x: x.priority, reverse=True):
 
     # Check if Series E is properly capped
     if sc.name == "Series E":
-        max_allowed = sc.invested * sc.participation_cap # pyright: ignore
-        if amount > max_allowed:
-            print(f"  >>> ERROR: Series E got ${amount/1000000:.2f}M but should be capped at ${max_allowed/1000000:.2f}M")
+        if sc.participation_cap is not None and sc.participation_cap > 0:
+            max_allowed = sc.invested * sc.participation_cap
+            if amount > max_allowed:
+                print(f"  >>> ERROR: Series E got ${amount/1000000:.2f}M but should be capped at ${max_allowed/1000000:.2f}M")
 
 print(f"\nTotal: ${sum(dist.values())/1000000:.2f}M")

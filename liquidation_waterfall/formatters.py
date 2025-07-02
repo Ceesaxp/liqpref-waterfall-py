@@ -12,10 +12,10 @@ from .core import WaterfallCalculator, PreferenceType
 def format_cap_table_summary(calculator: WaterfallCalculator) -> str:
     """
     Format a summary of the cap table.
-    
+
     Args:
         calculator: WaterfallCalculator instance with loaded share classes
-        
+
     Returns:
         Formatted string showing cap table summary
     """
@@ -50,11 +50,11 @@ def format_cap_table_summary(calculator: WaterfallCalculator) -> str:
 def format_waterfall_analysis(calculator: WaterfallCalculator, exit_values: List[float]) -> str:
     """
     Format waterfall analysis for given exit values.
-    
+
     Args:
         calculator: WaterfallCalculator instance with loaded share classes
         exit_values: List of exit values to analyze
-        
+
     Returns:
         Formatted string showing waterfall analysis across all exit values
     """
@@ -103,11 +103,11 @@ def format_waterfall_analysis(calculator: WaterfallCalculator, exit_values: List
 def format_conversion_analysis(calculator: WaterfallCalculator, exit_values: List[float]) -> str:
     """
     Format conversion analysis showing which share classes convert at each exit value.
-    
+
     Args:
         calculator: WaterfallCalculator instance with loaded share classes
         exit_values: List of exit values to analyze
-        
+
     Returns:
         Formatted string showing conversion decisions and rationale
     """
@@ -126,7 +126,7 @@ def format_conversion_analysis(calculator: WaterfallCalculator, exit_values: Lis
         distribution = all_distributions[i]
 
         # Check which classes actually converted based on distribution
-        total_shares = sum(sc.shares for sc in calculator.share_classes)
+        # total_shares = sum(sc.shares for sc in calculator.share_classes)
         converted = []
 
         for sc in calculator.share_classes:
@@ -156,34 +156,34 @@ def format_conversion_analysis(calculator: WaterfallCalculator, exit_values: Lis
 def format_detailed_analysis(calculator: WaterfallCalculator, exit_value: float) -> str:
     """
     Format a detailed step-by-step analysis of the waterfall calculation.
-    
+
     Args:
         calculator: WaterfallCalculator instance with loaded share classes
         exit_value: Single exit value to analyze in detail
-        
+
     Returns:
         Formatted string showing step-by-step waterfall calculation
     """
     lines = []
     lines.append(f"Detailed Waterfall Analysis: ${exit_value/1000000:.1f}M Exit")
     lines.append("=" * 80)
-    
+
     distribution = calculator.calculate_distribution(exit_value)
-    
+
     # Show the priority structure
     lines.append("Priority Structure:")
     lines.append("-" * 40)
-    
-    preferred_classes = [sc for sc in calculator.share_classes 
+
+    preferred_classes = [sc for sc in calculator.share_classes
                         if sc.preference_type != PreferenceType.COMMON]
-    
+
     if preferred_classes:
         priority_groups = {}
         for sc in preferred_classes:
             if sc.priority not in priority_groups:
                 priority_groups[sc.priority] = []
             priority_groups[sc.priority].append(sc)
-        
+
         for priority in sorted(priority_groups.keys(), reverse=True):
             group = priority_groups[priority]
             total_lp = sum(sc.invested * sc.preference_multiple for sc in group)
@@ -192,20 +192,20 @@ def format_detailed_analysis(calculator: WaterfallCalculator, exit_value: float)
                 lp_amount = sc.invested * sc.preference_multiple
                 lines.append(f"  - {sc.name}: ${lp_amount/1000000:.2f}M ({sc.preference_multiple}x)")
         lines.append("")
-    
+
     # Show final distribution
     lines.append("Final Distribution:")
     lines.append("-" * 40)
-    
+
     sorted_classes = sorted(calculator.share_classes, key=lambda x: x.priority, reverse=True)
-    
+
     for sc in sorted_classes:
         amount = distribution.get(sc.name, 0)
         pref_type = sc.preference_type.value.replace('_', ' ').title()
         lines.append(f"{sc.name:<15} ({pref_type:<17}): ${amount/1000000:>8.2f}M")
-    
+
     lines.append("-" * 40)
     total = sum(distribution.values())
     lines.append(f"{'Total':<35}: ${total/1000000:>8.2f}M")
-    
+
     return "\n".join(lines)

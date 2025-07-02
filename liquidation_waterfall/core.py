@@ -29,7 +29,7 @@ class AntiDilutionType(Enum):
 class ShareClass:
     """
     Represents a class of shares with liquidation preferences.
-    
+
     Attributes:
         name: Name of the share class (e.g., "Series A", "Common")
         shares: Number of shares outstanding
@@ -57,17 +57,17 @@ class ShareClass:
 class WaterfallCalculator:
     """
     Calculates liquidation preference waterfalls for startup cap tables.
-    
+
     This calculator models the distribution of proceeds from a company sale
     among different classes of shareholders based on their liquidation
     preferences, participation rights, and conversion options.
-    
+
     The waterfall algorithm:
     1. Pay liquidation preferences in priority order
     2. Distribute remaining proceeds to participating preferred and common
     3. Apply participation caps iteratively
     4. Consider conversion to common for non-participating preferred
-    
+
     Example:
         >>> calc = WaterfallCalculator()
         >>> common = ShareClass("Common", 1000000, 0, PreferenceType.COMMON)
@@ -76,7 +76,7 @@ class WaterfallCalculator:
         >>> calc.add_share_class(preferred)
         >>> distribution = calc.calculate_distribution(5000000)
     """
-    
+
     def __init__(self):
         self.share_classes: List[ShareClass] = []
 
@@ -87,10 +87,10 @@ class WaterfallCalculator:
     def calculate_distribution(self, exit_value: float) -> Dict[str, float]:
         """
         Calculate the distribution of exit proceeds among all share classes.
-        
+
         Args:
             exit_value: Total proceeds from the company sale
-            
+
         Returns:
             Dictionary mapping share class names to their payout amounts
         """
@@ -100,42 +100,42 @@ class WaterfallCalculator:
         # For non-participating preferred shares, we need to determine the optimal strategy:
         # take liquidation preference or convert to common
         # This requires calculating what they would get in each scenario
-        
+
         # First, calculate the "all take liquidation preference" scenario
         distribution_with_lp = self._calculate_with_all_liquidation_preferences(exit_value)
-        
+
         # Then check if any preferred shares would be better off converting
-        total_shares = sum(sc.shares for sc in self.share_classes)
+        #total_shares = sum(sc.shares for sc in self.share_classes)
         distribution = {}
-        
+
         # Check each share class to see if they should convert
         # We need to check what they would actually get if they converted
         converting_classes = []
-        
+
         # Check each non-participating preferred share class to see if they should convert
         # Participating preferred typically don't convert as they already get both
         # liquidation preference AND participation
         for share_class in self.share_classes:
-            if (share_class.preference_type == PreferenceType.NON_PARTICIPATING and 
+            if (share_class.preference_type == PreferenceType.NON_PARTICIPATING and
                 share_class.convertible):
                 # What would they get with liquidation preference?
                 lp_amount = distribution_with_lp.get(share_class.name, 0)
-                
+
                 # What would they get if they alone converted?
                 # Calculate distribution with just this class converting
                 test_distribution = self._calculate_with_conversions(exit_value, [share_class.name])
                 convert_amount = test_distribution.get(share_class.name, 0)
-                
+
                 # Only convert if converting gives more
                 if convert_amount > lp_amount:
                     converting_classes.append(share_class.name)
-        
+
         # If anyone is converting, recalculate with those shares as common
         if converting_classes:
             distribution = self._calculate_with_conversions(exit_value, converting_classes)
         else:
             distribution = distribution_with_lp
-            
+
         return distribution
 
     def _calculate_with_all_liquidation_preferences(self, exit_value: float) -> Dict[str, float]:
@@ -146,21 +146,21 @@ class WaterfallCalculator:
         # Group preferred shares by priority/stack order
         preferred_classes = [sc for sc in self.share_classes
                            if sc.preference_type != PreferenceType.COMMON]
-        
+
         # Group by priority
         priority_groups = {}
         for sc in preferred_classes:
             if sc.priority not in priority_groups:
                 priority_groups[sc.priority] = []
             priority_groups[sc.priority].append(sc)
-        
+
         # Process each priority level in order (highest first)
         for priority in sorted(priority_groups.keys(), reverse=True):
             group = priority_groups[priority]
-            
+
             # Calculate total liquidation preference for this priority level
             total_lp_amount = sum(sc.invested * sc.preference_multiple for sc in group)
-            
+
             if total_lp_amount <= remaining_value:
                 # Enough money to pay all at this level
                 for share_class in group:
@@ -174,7 +174,7 @@ class WaterfallCalculator:
                     pro_rata_share = liquidation_amount / total_lp_amount
                     payout = remaining_value * pro_rata_share
                     distribution[share_class.name] = payout
-                
+
                 remaining_value = 0
                 break
 
@@ -182,7 +182,7 @@ class WaterfallCalculator:
         if remaining_value > 0:
             participating_classes = [sc for sc in self.share_classes
                                    if sc.preference_type in [PreferenceType.COMMON, PreferenceType.PARTICIPATING]]
-            
+
             if participating_classes:
                 # Apply caps iteratively for participating preferred
                 remaining_to_distribute = remaining_value
@@ -232,12 +232,12 @@ class WaterfallCalculator:
                     if not classes_to_remove:
                         # No caps hit, we're done
                         break
-        
+
         # Ensure all share classes have an entry (even if 0)
         for share_class in self.share_classes:
             if share_class.name not in distribution:
                 distribution[share_class.name] = 0
-                
+
         return distribution
 
     def _calculate_with_conversions(self, exit_value: float, converting_classes: List[str]) -> Dict[str, float]:
@@ -247,23 +247,23 @@ class WaterfallCalculator:
 
         # First, pay liquidation preferences to non-converting preferred
         preferred_classes = [sc for sc in self.share_classes
-                           if sc.preference_type != PreferenceType.COMMON 
+                           if sc.preference_type != PreferenceType.COMMON
                            and sc.name not in converting_classes]
-        
+
         # Group by priority
         priority_groups = {}
         for sc in preferred_classes:
             if sc.priority not in priority_groups:
                 priority_groups[sc.priority] = []
             priority_groups[sc.priority].append(sc)
-        
+
         # Process each priority level
         for priority in sorted(priority_groups.keys(), reverse=True):
             group = priority_groups[priority]
-            
+
             # Calculate total liquidation preference for non-converting shares at this level
             total_lp_amount = sum(sc.invested * sc.preference_multiple for sc in group)
-            
+
             if total_lp_amount <= remaining_value:
                 # Enough money to pay all at this level
                 for share_class in group:
@@ -277,41 +277,41 @@ class WaterfallCalculator:
                     pro_rata_share = liquidation_amount / total_lp_amount
                     payout = remaining_value * pro_rata_share
                     distribution[share_class.name] = payout
-                
+
                 remaining_value = 0
                 break
 
         # Then distribute remaining pro-rata among common + converting preferred + participating
         if remaining_value > 0:
             eligible_classes = [sc for sc in self.share_classes
-                              if (sc.preference_type == PreferenceType.COMMON or 
+                              if (sc.preference_type == PreferenceType.COMMON or
                                   sc.name in converting_classes or
-                                  (sc.preference_type == PreferenceType.PARTICIPATING and 
+                                  (sc.preference_type == PreferenceType.PARTICIPATING and
                                    sc.name not in converting_classes))]
-            
+
             if eligible_classes:
                 # Apply caps iteratively for participating preferred
                 remaining_to_distribute = remaining_value
                 uncapped_classes = eligible_classes.copy()
-                
+
                 while uncapped_classes and remaining_to_distribute > 0:
                     total_uncapped_shares = sum(sc.shares for sc in uncapped_classes)
                     classes_to_remove = []
                     total_distributed_this_round = 0
-                    
+
                     for share_class in uncapped_classes:
                         ownership_percentage = share_class.shares / total_uncapped_shares
                         additional_payout = remaining_to_distribute * ownership_percentage
-                        
+
                         # Check cap for participating preferred
                         if (share_class.preference_type == PreferenceType.PARTICIPATING and
                             share_class.participation_cap is not None and
                             share_class.participation_cap > 0 and
                             share_class.name not in converting_classes):
-                            
+
                             max_total = share_class.invested * share_class.participation_cap
                             current_total = distribution.get(share_class.name, 0)
-                            
+
                             if current_total + additional_payout > max_total:
                                 # Cap this class
                                 capped_payout = max_total - current_total
@@ -329,19 +329,19 @@ class WaterfallCalculator:
                             else:
                                 distribution[share_class.name] = additional_payout
                             total_distributed_this_round += additional_payout
-                    
+
                     remaining_to_distribute -= total_distributed_this_round
-                    
+
                     # Remove capped classes
                     for cls in classes_to_remove:
                         uncapped_classes.remove(cls)
-                    
+
                     if not classes_to_remove:
                         break
-        
+
         # Ensure all share classes have an entry
         for share_class in self.share_classes:
             if share_class.name not in distribution:
                 distribution[share_class.name] = 0
-                
+
         return distribution
