@@ -40,12 +40,16 @@ def parse_cap_table_csv(csv_file_path: str) -> WaterfallCalculator:
 
             # Handle both old and new CSV formats
             series = row.get('Share Class', row.get('Series', ''))
-            shares = int(row.get('# Shares', row.get('Shares', 0)))
-            price = float(row.get('Price', 0))
-            liq_pref_multiple = float(row.get('LPMultiple', row.get('LiqPrefMultiple', 1)))
+            shares_raw = row.get('# Shares', row.get('Shares', 0))
+            shares = int(shares_raw) if shares_raw is not None and shares_raw != '' else 0
+            price_raw = row.get('Price', 0)
+            price = float(price_raw) if price_raw is not None and price_raw != '' else 0.0
+            liq_pref_raw = row.get('LPMultiple', row.get('LiqPrefMultiple', 1))
+            liq_pref_multiple = float(liq_pref_raw) if liq_pref_raw is not None and liq_pref_raw != '' else 1.0
             participating = row.get('Participation', row.get('Participating', 'FALSE')).upper() == 'TRUE'
             convertible = row.get('Convertible', 'TRUE').upper() == 'TRUE'
-            stack_order = int(row.get('Stack Order', row.get('Order', 0)))
+            order_raw = row.get('Stack Order', row.get('Order', 0))
+            stack_order = int(order_raw) if order_raw is not None and order_raw != '' else 0
             # Parse participation cap - it's a multiplier (e.g., 2 means 2x cap)
             cap_value = row.get('Participation Cap', '0')
             participation_cap = float(cap_value) if cap_value and cap_value != '0' else None

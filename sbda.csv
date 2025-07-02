@@ -1,0 +1,7 @@
+Share Class,Stack Order,# Shares,Price,LPMultiple,Participation,Convertible,Participation Cap,AD Type
+B: Shareholder 1,2,100000,10.0,1.25,TRUE,TRUE,0,None
+B: Shareholder 2,2,150000,10.0,1.25,TRUE,TRUE,0,None
+B: Shareholder 3,2,200000,10.0,1.25,TRUE,TRUE,0,None
+A: Investor 1,1,100000,5.0,2.0,TRUE,TRUE,0,None
+A: Investor 2,1,200000,5.0,2.0,TRUE,TRUE,0,None
+Common,0,650000,1.0,1.0,TRUE,TRUE,0,None

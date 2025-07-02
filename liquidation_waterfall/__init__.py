@@ -36,7 +36,8 @@ from .parser import (
 from .formatters import (
     format_cap_table_summary,
     format_waterfall_analysis,
-    format_conversion_analysis
+    format_conversion_analysis,
+    format_detailed_analysis
 )
 
 __version__ = "1.0.0"
@@ -51,5 +52,6 @@ __all__ = [
     "parse_cap_table_dict",
     "format_cap_table_summary",
     "format_waterfall_analysis", 
-    "format_conversion_analysis"
+    "format_conversion_analysis",
+    "format_detailed_analysis"
 ]
