@@ -1,0 +1,5 @@
+Seniority;Round_Amount;Investor_Amount;Round_Shares;Investor_Shares;Preferred;Participating;CAP;MP;Common_Pool
+1;5000000.00;2000000.00;500000;200000;1;0;0;1.0;1
+2;2000000.00;1000000.00;200000;100000;1;0;0;1.0;1
+3;1000000.00;500000.00;100000;50000;1;1;3.0;1.0;1
+4;0.00;0.00;300000;0;0;1;0;1.0;1

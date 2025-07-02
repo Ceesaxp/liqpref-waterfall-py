@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest test_lp.py -v)",
+      "Bash(python:*)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": []
+  }
+}
