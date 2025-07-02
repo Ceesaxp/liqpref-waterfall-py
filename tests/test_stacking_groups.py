@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test stacking groups with different multiples within same priority"""
 
-from waterfall import WaterfallCalculator, ShareClass, PreferenceType
+from liquidation_waterfall import WaterfallCalculator, ShareClass, PreferenceType
 
 # Create the example scenario from the description
 calc = WaterfallCalculator()
@@ -17,7 +17,7 @@ shareholder1 = ShareClass(
 )
 
 shareholder2 = ShareClass(
-    name="Shareholder 2", 
+    name="Shareholder 2",
     shares=500000,
     invested=5000000,   # 500K shares * $10
     preference_type=PreferenceType.NON_PARTICIPATING,
@@ -27,7 +27,7 @@ shareholder2 = ShareClass(
 
 shareholder3 = ShareClass(
     name="Shareholder 3",
-    shares=500000, 
+    shares=500000,
     invested=5000000,   # 500K shares * $10
     preference_type=PreferenceType.NON_PARTICIPATING,
     preference_multiple=1.25,
@@ -48,9 +48,9 @@ sh2_lp = shareholder2.invested * shareholder2.preference_multiple  # 5M * 1.5 = 
 sh3_lp = shareholder3.invested * shareholder3.preference_multiple  # 5M * 1.25 = 6.25M
 total_lp = sh1_lp + sh2_lp + sh3_lp  # 33.75M
 
-print(f"Liquidation Preferences:")
+print("Liquidation Preferences:")
 print(f"  Shareholder 1: ${sh1_lp/1000000:.1f}M")
-print(f"  Shareholder 2: ${sh2_lp/1000000:.1f}M") 
+print(f"  Shareholder 2: ${sh2_lp/1000000:.1f}M")
 print(f"  Shareholder 3: ${sh3_lp/1000000:.1f}M")
 print(f"  Total LP: ${total_lp/1000000:.2f}M")
 print()
@@ -58,10 +58,10 @@ print()
 # Expected pro-rata payouts at $20M
 exit_value = 20000000
 expected_sh1 = exit_value * (sh1_lp / total_lp)  # 20 * 20 / 33.75 = 11.85M
-expected_sh2 = exit_value * (sh2_lp / total_lp)  # 20 * 7.5 / 33.75 = 4.44M  
+expected_sh2 = exit_value * (sh2_lp / total_lp)  # 20 * 7.5 / 33.75 = 4.44M
 expected_sh3 = exit_value * (sh3_lp / total_lp)  # 20 * 6.25 / 33.75 = 3.70M
 
-print(f"Expected Pro-rata Payouts:")
+print("Expected Pro-rata Payouts:")
 print(f"  Shareholder 1: ${expected_sh1/1000000:.2f}M")
 print(f"  Shareholder 2: ${expected_sh2/1000000:.2f}M")
 print(f"  Shareholder 3: ${expected_sh3/1000000:.2f}M")
@@ -71,7 +71,7 @@ print()
 # Actual calculation
 distribution = calc.calculate_distribution(exit_value)
 
-print(f"Actual Distribution:")
+print("Actual Distribution:")
 print(f"  Shareholder 1: ${distribution.get('Shareholder 1', 0)/1000000:.2f}M")
 print(f"  Shareholder 2: ${distribution.get('Shareholder 2', 0)/1000000:.2f}M")
 print(f"  Shareholder 3: ${distribution.get('Shareholder 3', 0)/1000000:.2f}M")

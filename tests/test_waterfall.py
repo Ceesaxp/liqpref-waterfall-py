@@ -1,5 +1,5 @@
 import unittest
-from waterfall import WaterfallCalculator, ShareClass, PreferenceType
+from liquidation_waterfall import WaterfallCalculator, ShareClass, PreferenceType
 
 
 class TestWaterfallCalculator(unittest.TestCase):
