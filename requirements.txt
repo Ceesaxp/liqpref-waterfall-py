@@ -1,0 +1,8 @@
+# Liquidation Preference Waterfall Calculator
+# 
+# This library uses only Python standard library modules.
+# No external dependencies are required.
+#
+# For development/testing, you may want to install:
+# pytest>=6.0.0
+# pytest-cov>=2.0.0
